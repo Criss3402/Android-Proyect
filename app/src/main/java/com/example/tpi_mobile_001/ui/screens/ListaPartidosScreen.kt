@@ -45,16 +45,47 @@ fun ListaPartidosScreen(viewModel: PartidoViewModel) {
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Text(
-                                    text = "${partido.EquipoLocal} vs ${partido.EquipoVisitante}",
+                                    text = "${getBandera(partido.EquipoLocal)} ${partido.EquipoLocal} vs ${getBandera(partido.EquipoVisitante)} ${partido.EquipoVisitante}",
                                     style = MaterialTheme.typography.titleMedium
                                 )
                                 Text(text = "📍 ${partido.Estadio}")
                                 Text(text = "🏆 ${partido.Fase}")
+                                Text(text = "📅 ${partido.Fecha}  🕐 ${partido.Hora}")
                             }
                         }
                     }
                 }
             }
         }
+    }
+}
+
+fun getBandera(equipo: String): String {
+    return when (equipo) {
+        "México" -> "🇲🇽"
+        "Sudáfrica" -> "🇿🇦"
+        "Corea del Sur" -> "🇰🇷"
+        "Chequia" -> "🇨🇿"
+        "Canadá" -> "🇨🇦"
+        "Bosnia y Herzegovina" -> "🇧🇦"
+        "Estados Unidos" -> "🇺🇸"
+        "Paraguay" -> "🇵🇾"
+        "Catar" -> "🇶🇦"
+        "Suiza" -> "🇨🇭"
+        "Brasil" -> "🇧🇷"
+        "Marruecos" -> "🇲🇦"
+        "Haití" -> "🇭🇹"
+        "Escocia" -> "🏴󠁧󠁢󠁳󠁣󠁴󠁿"
+        "Australia" -> "🇦🇺"
+        "Turquía" -> "🇹🇷"
+        "Alemania" -> "🇩🇪"
+        "Curazao" -> "🇨🇼"
+        "Países Bajos" -> "🇳🇱"
+        "Japón" -> "🇯🇵"
+        "Costa de Marfil" -> "🇨🇮"
+        "Ecuador" -> "🇪🇨"
+        "Suecia" -> "🇸🇪"
+        "Túnez" -> "🇹🇳"
+        else -> "🏳️"
     }
 }

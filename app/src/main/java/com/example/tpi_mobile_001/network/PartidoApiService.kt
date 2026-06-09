@@ -4,6 +4,6 @@ import com.example.tpi_mobile_001.models.Partido
 import retrofit2.http.GET
 
 interface PartidoApiService {
-    @GET("ListaPartidos")
+    @GET("listaPartidos")
     suspend fun getPartidos(): List<Partido>
 }
