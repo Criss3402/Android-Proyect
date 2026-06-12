@@ -1,5 +1,8 @@
 package com.example.tpi_mobile_001.models
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Partido(
     val id: String,
     val EquipoLocal: String,

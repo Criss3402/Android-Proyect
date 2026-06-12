@@ -5,16 +5,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.tpi_mobile_001.models.Partido
 import com.example.tpi_mobile_001.repository.PartidoRepository
 import kotlinx.coroutines.launch
 
 class PartidoViewModel : ViewModel() {
     private val repository = PartidoRepository()
 
-    var partidos by mutableStateOf<List<Partido>>(emptyList())
-    var isLoading by mutableStateOf(false)
-    var error by mutableStateOf<String?>(null)
+    var uiState by mutableStateOf<PartidoUiState>(PartidoUiState.Loading)
 
     init {
         cargarPartidos()
@@ -22,14 +19,12 @@ class PartidoViewModel : ViewModel() {
 
     fun cargarPartidos() {
         viewModelScope.launch {
-            isLoading = true
-            error = null
+            uiState = PartidoUiState.Loading
             try {
-                partidos = repository.getPartidos()
+                val partidos = repository.getPartidos()
+                uiState = PartidoUiState.Success(partidos)
             } catch (e: Exception) {
-                error = "Error al cargar los partidos"
-            } finally {
-                isLoading = false
+                uiState = PartidoUiState.Error("Error al cargar los partidos")
             }
         }
     }

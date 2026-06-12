@@ -1,5 +1,6 @@
 package com.example.tpi_mobile_001.ui.screens
 
+import com.example.tpi_mobile_001.models.Partido
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -8,10 +9,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.tpi_mobile_001.viewmodel.PartidoUiState
 import com.example.tpi_mobile_001.viewmodel.PartidoViewModel
-
+import com.example.tpi_mobile_001.ui.components.getBandera
 @Composable
-fun ListaPartidosScreen(viewModel: PartidoViewModel) {
+fun ListaPartidosScreen(
+    viewModel: PartidoViewModel,
+    onPartidoClick: (Partido) -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -23,22 +28,23 @@ fun ListaPartidosScreen(viewModel: PartidoViewModel) {
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        when {
-            viewModel.isLoading -> {
+        when (val state = viewModel.uiState) {
+            is PartidoUiState.Loading -> {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
             }
-            viewModel.error != null -> {
+            is PartidoUiState.Error -> {
                 Text(
-                    text = viewModel.error!!,
+                    text = state.mensaje,
                     color = MaterialTheme.colorScheme.error
                 )
             }
-            else -> {
+            is PartidoUiState.Success -> {
                 LazyColumn {
-                    items(viewModel.partidos) { partido ->
+                    items(state.partidos) { partido ->
                         Card(
+                            onClick = { onPartidoClick(partido) },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 8.dp)
@@ -60,55 +66,3 @@ fun ListaPartidosScreen(viewModel: PartidoViewModel) {
     }
 }
 
-fun getBandera(equipo: String): String {
-    return when (equipo) {
-        "México" -> "🇲🇽"
-        "Sudáfrica" -> "🇿🇦"
-        "Corea del Sur" -> "🇰🇷"
-        "Chequia" -> "🇨🇿"
-        "Canadá" -> "🇨🇦"
-        "Bosnia y Herzegovina" -> "🇧🇦"
-        "Estados Unidos" -> "🇺🇸"
-        "Paraguay" -> "🇵🇾"
-        "Catar" -> "🇶🇦"
-        "Suiza" -> "🇨🇭"
-        "Brasil" -> "🇧🇷"
-        "Marruecos" -> "🇲🇦"
-        "Haití" -> "🇭🇹"
-        "Escocia" -> "🏴󠁧󠁢󠁳󠁣󠁴󠁿"
-        "Australia" -> "🇦🇺"
-        "Turquía" -> "🇹🇷"
-        "Alemania" -> "🇩🇪"
-        "Curazao" -> "🇨🇼"
-        "Países Bajos" -> "🇳🇱"
-        "Japón" -> "🇯🇵"
-        "Costa de Marfil" -> "🇨🇮"
-        "Ecuador" -> "🇪🇨"
-        "Suecia" -> "🇸🇪"
-        "Túnez" -> "🇹🇳"
-        "España" -> "🇪🇸"
-        "Arabia Saudita" -> "🇸🇦"
-        "Uruguay" -> "🇺🇾"
-        "Cabo Verde" -> "🇨🇻"
-        "Francia" -> "🇫🇷"
-        "Nigeria" -> "🇳🇬"
-        "Senegal" -> "🇸🇳"
-        "Nueva Zelanda" -> "🇳🇿"
-        "Croacia" -> "🇭🇷"
-        "Irán" -> "🇮🇷"
-        "Irak" -> "🇮🇶"
-        "Noruega" -> "🇳🇴"
-        "Argentina" -> "🇦🇷"
-        "Austria" -> "🇦🇹"
-        "Argelia" -> "🇩🇿"
-        "Jordania" -> "🇯🇴"
-        "Inglaterra" -> "🏴󠁧󠁢󠁥󠁮󠁧󠁿"
-        "Ghana" -> "🇬🇭"
-        "Panamá" -> "🇵🇦"
-        "Portugal" -> "🇵🇹"
-        "RD Congo" -> "🇨🇩"
-        "Uzbekistán" -> "🇺🇿"
-        "Colombia" -> "🇨🇴"
-        else -> "🏳️"
-    }
-}
