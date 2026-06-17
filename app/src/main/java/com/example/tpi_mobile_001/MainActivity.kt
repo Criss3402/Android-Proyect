@@ -11,14 +11,15 @@ import androidx.compose.ui.Modifier
 import com.example.tpi_mobile_001.ui.navigation.AppNavigation
 import com.example.tpi_mobile_001.ui.theme.TPIMobile001Theme
 import com.example.tpi_mobile_001.viewmodel.PartidoViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val viewModel = PartidoViewModel()
         setContent {
             TPIMobile001Theme {
+                val viewModel: PartidoViewModel = viewModel()
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     AppNavigation(
                         viewModel = viewModel,
