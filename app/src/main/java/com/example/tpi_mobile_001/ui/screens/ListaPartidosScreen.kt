@@ -13,9 +13,11 @@ import com.example.tpi_mobile_001.viewmodel.PartidoUiState
 import com.example.tpi_mobile_001.viewmodel.PartidoViewModel
 import com.example.tpi_mobile_001.ui.components.getBandera
 @Composable
+// Firma actualizada con el nuevo parámetro
 fun ListaPartidosScreen(
     viewModel: PartidoViewModel,
-    onPartidoClick: (Partido) -> Unit
+    onPartidoClick: (Partido) -> Unit,
+    onCerrarSesion: () -> Unit  //  nuevo
 ) {
     Column(
         modifier = Modifier
@@ -27,6 +29,11 @@ fun ListaPartidosScreen(
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(bottom = 16.dp)
         )
+        // Botón nuevo para cerrar sesión y volver al login
+        TextButton(onClick = onCerrarSesion){
+            Text("Cerrar sesión")
+        }
+        // ... resto del código igual ajajaj XDDDDDDDDDDDDDDD ahre
 
         when (val state = viewModel.uiState) {
             is PartidoUiState.Loading -> {
