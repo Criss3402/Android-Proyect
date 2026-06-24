@@ -42,26 +42,26 @@ fun DetallePartidoScreen(partido: Partido, onVolver: () -> Unit) {
             item {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "${getBandera(partido.EquipoLocal)} ${partido.EquipoLocal}",
+                    text = "${getBandera(equipo = partido.equipoLocalNombre)} ${partido.equipoLocalNombre}",
                     style = MaterialTheme.typography.headlineMedium
                 )
                 Text(text = "VS", fontSize = 24.sp)
                 Text(
-                    text = "${getBandera(partido.EquipoVisitante)} ${partido.EquipoVisitante}",
+                    text = "${getBandera(equipo = partido.equipoVisitanteNombre)} ${partido.equipoVisitanteNombre}",
                     style = MaterialTheme.typography.headlineMedium
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 Divider()
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "📍 Estadio: ${partido.Estadio}", style = MaterialTheme.typography.bodyLarge)
+                Text(text = " Estadio: ${partido.estadio}", style = MaterialTheme.typography.bodyLarge)
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "🏆 Fase: ${partido.Fase}", style = MaterialTheme.typography.bodyLarge)
+                Text(text = " Fase: ${partido.fase}", style = MaterialTheme.typography.bodyLarge)
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "📅 Fecha: ${partido.Fecha}", style = MaterialTheme.typography.bodyLarge)
+                Text(text = " Fecha: ${partido.fecha}", style = MaterialTheme.typography.bodyLarge)
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "🕐 Hora: ${partido.Hora}", style = MaterialTheme.typography.bodyLarge)
+                Text(text = " Hora: ${partido.hora}", style = MaterialTheme.typography.bodyLarge)
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "⚽ Goles: ${partido.GolesLocal} - ${partido.GolesVisitante}", style = MaterialTheme.typography.bodyLarge)
+                Text(text = " Goles: ${partido.golesLocal} - ${partido.golesVisitante}", style = MaterialTheme.typography.bodyLarge)
             }
         }
     }

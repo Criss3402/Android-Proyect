@@ -1,11 +1,41 @@
 package com.example.tpi_mobile_001.models
 
-data class Usuario(
+import kotlinx.serialization.Serializable
+
+// Lo que se manda para REGISTRARSE. Coincide con RegistroUsuarioDto de la API en C#.
+// El password viaja en texto plano por HTTPS hacia la API — la API es quien
+// lo hashea antes de guardarlo, Kotlin nunca toca esa lógica.
+@Serializable
+data class RegistroRequest(
+    val username: String,
     val email: String,
     val password: String
 )
 
-// Modelo simple de usuario para el login/registro.
-// Por ahora solo tiene email y password porque no hay backend todavía.
-// Cuando se conecte la API real (TP6 etapa 2), probablemente se agreguen
-// más campos como id, nombre, etc.
+// Lo que se manda para LOGUEARSE. Coincide con LoginDto de la API.
+// Solo necesita username y password (no email) porque así definimos el login del lado del server.
+@Serializable
+data class LoginRequest(
+    val username: String,
+    val password: String
+)
+
+// Lo que la API DEVUELVE después de un login exitoso. Coincide con LoginResponseDto.
+// El "token" es el JWT que hay que guardar y reusar en los pedidos protegidos
+// (mandándolo en el header Authorization: Bearer {token}).
+@Serializable
+data class LoginResponse(
+    val token: String,
+    val usuarioId: Int,
+    val username: String
+)
+
+// Lo que la API devuelve al consultar o registrar un usuario. Coincide con UsuarioDto.
+// Notar que NO tiene password ni nada sensible — la API nunca expone esos datos,
+// así que del lado de Kotlin tampoco hay forma de recibirlos ni de necesitarlos.
+@Serializable
+data class Usuario(
+    val usuarioId: Int,
+    val username: String,
+    val email: String
+)

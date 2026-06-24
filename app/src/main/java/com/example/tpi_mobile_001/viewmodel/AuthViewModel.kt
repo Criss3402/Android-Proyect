@@ -4,16 +4,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.example.tpi_mobile_001.models.Usuario
+import androidx.lifecycle.viewModelScope
+import com.example.tpi_mobile_001.models.LoginRequest
+import com.example.tpi_mobile_001.models.RegistroRequest
+import com.example.tpi_mobile_001.network.RetrofitClient
+import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 class AuthViewModel : ViewModel() {
-    // Usuario hardcodeado mientras no hay backend
-    // Lista en memoria que simula una "base de datos" temporal de usuarios.
-    // Ya viene con un usuario de prueba para poder loguearse sin registrarse.
-    private val usuariosRegistrados = mutableListOf(
-        Usuario(email = "admin@test.com", password = "123456")
-    )
-
 
     // Bandera que indica si hay sesión activa.
     // La navegación (AppNavigation) la usa para decidir si redirigir
@@ -21,32 +19,72 @@ class AuthViewModel : ViewModel() {
     var isLoggedIn by mutableStateOf(false)
 
     // Mensaje de error para mostrar en la UI (credenciales incorrectas,
-    // usuario ya existe, etc.)
+    // usuario ya existe, fallo de conexión, etc.)
     var errorMessage by mutableStateOf<String?>(null)
 
+    // El token JWT recibido al loguearse. Se guarda en memoria para
+    // usarlo después en pedidos protegidos (ej: comprar una entrada).
+    var token: String? = null
+        private set
 
-    // Busca si existe un usuario con ese email y password exactos.
-    // Si lo encuentra, marca la sesión como iniciada.
-    fun login(email: String, password: String) {
-        val usuario = usuariosRegistrados.find { it.email == email && it.password == password }
-        if (usuario != null) {
-            isLoggedIn = true
-            errorMessage = null
-        } else {
-            errorMessage = "Email o contraseña incorrectos"
+    // El Id del usuario logueado, también sacado de la respuesta del login.
+    var usuarioId: Int? = null
+        private set
+
+    // Llama a POST /api/usuarios/login. Es asíncrono porque implica una
+    // llamada de red real. Recibe un "onExito" que se ejecuta SOLO si el
+    // login terminó bien — así la pantalla que lo llama sabe el momento
+    // exacto en que puede navegar a la siguiente vista, en vez de adivinar.
+    fun login(username: String, password: String, onExito: () -> Unit = {}) {
+        viewModelScope.launch {
+            try {
+                val respuesta = RetrofitClient.usuarioApi.login(
+                    LoginRequest(username = username, password = password)
+                )
+                token = respuesta.token
+                usuarioId = respuesta.usuarioId
+                isLoggedIn = true
+                errorMessage = null
+                onExito()
+            } catch (e: HttpException) {
+                errorMessage = if (e.code() == 401) {
+                    "Usuario o contraseña incorrectos"
+                } else {
+                    "Error al iniciar sesión (código ${e.code()})"
+                }
+            } catch (e: Exception) {
+                errorMessage = "Error: ${e.message}"
+            }
         }
     }
 
-    // Verifica que el email no esté ya registrado, y si no lo está,
-    // lo agrega a la lista en memoria y loguea automáticamente.
-    fun registrar(email: String, password: String) {
-        val yaExiste = usuariosRegistrados.any { it.email == email }
-        if (yaExiste) {
-            errorMessage = "El usuario ya existe"
-        } else {
-            usuariosRegistrados.add(Usuario(email, password))
-            isLoggedIn = true
-            errorMessage = null
+    // Llama a POST /api/usuarios/registro. Si el registro es exitoso,
+    // loguea automáticamente al usuario recién creado, y recién ahí
+    // ejecuta el "onExito" (delegado al login, que es quien realmente
+    // confirma que la sesión quedó iniciada).
+    fun registrar(username: String, email: String, password: String, onExito: () -> Unit = {}) {
+        viewModelScope.launch {
+            try {
+                RetrofitClient.usuarioApi.registrar(
+                    RegistroRequest(username = username, email = email, password = password)
+                )
+                login(username, password, onExito)
+            } catch (e: HttpException) {
+                errorMessage = if (e.code() == 409) {
+                    "Ese username ya está en uso"
+                } else {
+                    "Error al registrarse (código ${e.code()})"
+                }
+            } catch (e: Exception) {
+                errorMessage = "Error: ${e.message}"
+            }
         }
+    }
+
+    // Cierra la sesión: borra el token y vuelve al estado de "no logueado".
+    fun cerrarSesion() {
+        isLoggedIn = false
+        token = null
+        usuarioId = null
     }
 }

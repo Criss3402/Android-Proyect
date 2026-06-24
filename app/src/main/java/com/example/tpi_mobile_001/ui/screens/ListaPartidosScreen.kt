@@ -12,12 +12,12 @@ import androidx.compose.ui.unit.dp
 import com.example.tpi_mobile_001.viewmodel.PartidoUiState
 import com.example.tpi_mobile_001.viewmodel.PartidoViewModel
 import com.example.tpi_mobile_001.ui.components.getBandera
+
 @Composable
-// Firma actualizada con el nuevo parámetro
 fun ListaPartidosScreen(
     viewModel: PartidoViewModel,
     onPartidoClick: (Partido) -> Unit,
-    onCerrarSesion: () -> Unit  //  nuevo
+    onCerrarSesion: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -29,11 +29,10 @@ fun ListaPartidosScreen(
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(bottom = 16.dp)
         )
-        // Botón nuevo para cerrar sesión y volver al login
-        TextButton(onClick = onCerrarSesion){
+
+        TextButton(onClick = onCerrarSesion) {
             Text("Cerrar sesión")
         }
-        // ... resto del código igual ajajaj XDDDDDDDDDDDDDDD ahre
 
         when (val state = viewModel.uiState) {
             is PartidoUiState.Loading -> {
@@ -56,14 +55,14 @@ fun ListaPartidosScreen(
                                 .fillMaxWidth()
                                 .padding(vertical = 8.dp)
                         ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
+                            Column(modifier = Modifier.padding(all = 16.dp)) {
                                 Text(
-                                    text = "${getBandera(partido.EquipoLocal)} ${partido.EquipoLocal} vs ${getBandera(partido.EquipoVisitante)} ${partido.EquipoVisitante}",
+                                    text = "${getBandera(equipo = partido.equipoLocalNombre)} ${partido.equipoLocalNombre} vs ${getBandera(equipo = partido.equipoVisitanteNombre)} ${partido.equipoVisitanteNombre}",
                                     style = MaterialTheme.typography.titleMedium
                                 )
-                                Text(text = "📍 ${partido.Estadio}")
-                                Text(text = "🏆 ${partido.Fase}")
-                                Text(text = "📅 ${partido.Fecha}  🕐 ${partido.Hora}")
+                                Text(text = "📍 ${partido.estadio}")
+                                Text(text = "🏆 ${partido.fase}")
+                                Text(text = "📅 ${partido.fecha}  🕐 ${partido.hora}")
                             }
                         }
                     }
@@ -72,4 +71,3 @@ fun ListaPartidosScreen(
         }
     }
 }
-

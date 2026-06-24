@@ -6,7 +6,7 @@ import com.example.tpi_mobile_001.models.Partido
 import com.example.tpi_mobile_001.network.RetrofitClient
 
 class PartidoRepository(context: Context) {
-    private val api = RetrofitClient.api
+    private val api = RetrofitClient.partidoApi
     private val local = PartidoLocalDataSource(context)
 
     suspend fun getPartidos(): List<Partido> {

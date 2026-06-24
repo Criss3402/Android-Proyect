@@ -5,18 +5,41 @@ import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Retrofit
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 
+// object = un singleton en Kotlin: solo existe UNA instancia de RetrofitClient
+// en toda la app, compartida por todos lados donde se la use.
 object RetrofitClient {
-    private const val BASE_URL = "https://6a28488a4e1e783349a56173.mockapi.io/"
 
+    // La URL base de la API. 10.0.2.2 es la IP especial que representa,
+    // desde DENTRO del emulador de Android, "la PC que está corriendo el emulador".
+    // Si en algún momento prueban en un celular físico, esto cambia a la IP de red real.
+    private const val BASE_URL = "http://10.0.2.2:5089/"
+
+    // Configuración de cómo se convierte JSON <-> objetos Kotlin.
+    // ignoreUnknownKeys = true: si la API devuelve un campo que el modelo Kotlin
+    // no tiene definido, no falla — simplemente lo ignora. Da más margen de error
+    // sin romper la app si la API cambia ligeramente.
     private val json = Json { ignoreUnknownKeys = true }
 
-    val api: PartidoApiService by lazy {
+    // "by lazy": esta variable se crea recién la PRIMERA VEZ que alguien la usa,
+    // no apenas arranca la app. Es eficiente porque si nunca se llega a usar,
+    // nunca se gasta el trabajo de construirla.
+    private val retrofit: Retrofit by lazy {
         Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(
+            .baseUrl(BASE_URL)                    // a dónde van todos los pedidos
+            .addConverterFactory(                  // cómo convertir JSON <-> Kotlin
                 json.asConverterFactory("application/json".toMediaType())
             )
-            .build()
-            .create(PartidoApiService::class.java)
+            .build()                                // arma el objeto Retrofit final
+    }
+
+    // Servicio para los endpoints de Partido. Retrofit "implementa" automáticamente
+    // la interfaz PartidoApiService a partir de las anotaciones (@GET, @POST, etc.)
+    val partidoApi: PartidoApiService by lazy {
+        retrofit.create(PartidoApiService::class.java)
+    }
+
+    // Servicio para los endpoints de Usuario (registro/login).
+    val usuarioApi: UsuarioApiService by lazy {
+        retrofit.create(UsuarioApiService::class.java)
     }
 }

@@ -25,7 +25,7 @@ fun LoginScreen(
     // Estados locales de los campos de texto.
     // Usamos 'remember' (no mutableStateOf del ViewModel) porque son
     // específicos de esta pantalla, no necesitan sobrevivir fuera de ella.
-    var email by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
     Column(
@@ -41,12 +41,11 @@ fun LoginScreen(
         )
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Campo de email
+        // Campo de usuario
         OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            value = username,
+            onValueChange = { username = it },
+            label = { Text("Usuario") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -70,9 +69,7 @@ fun LoginScreen(
 
         Button(
             onClick = {
-                authViewModel.login(email, password)
-                // Solo navegamos si el login fue exitoso
-                if (authViewModel.isLoggedIn) onLoginExitoso()
+                authViewModel.login(username, password, onExito = onLoginExitoso)
             },
             modifier = Modifier.fillMaxWidth()
         ) {

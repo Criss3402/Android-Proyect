@@ -21,9 +21,9 @@ fun RegisterScreen(
     onRegistroExitoso: () -> Unit,
     onVolverALogin: () -> Unit
 ) {
+    var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    // Campo extra para validar que el usuario escribió bien su contraseña
     var confirmarPassword by remember { mutableStateOf("") }
 
     Column(
@@ -38,6 +38,14 @@ fun RegisterScreen(
             style = MaterialTheme.typography.headlineMedium
         )
         Spacer(modifier = Modifier.height(32.dp))
+
+        OutlinedTextField(
+            value = username,
+            onValueChange = { username = it },
+            label = { Text("Nombre de usuario") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
             value = email,
@@ -75,12 +83,12 @@ fun RegisterScreen(
 
         Button(
             onClick = {
-                // Validación local: si no coinciden, ni siquiera llamamos al ViewModel
                 if (password != confirmarPassword) {
                     authViewModel.errorMessage = "Las contraseñas no coinciden"
                 } else {
-                    authViewModel.registrar(email, password)
-                    if (authViewModel.isLoggedIn) onRegistroExitoso()
+                    // onRegistroExitoso() ahora se llama DESDE EL CALLBACK,
+                    // recién cuando la API confirma que todo salió bien.
+                    authViewModel.registrar(username, email, password, onExito = onRegistroExitoso)
                 }
             },
             modifier = Modifier.fillMaxWidth()
