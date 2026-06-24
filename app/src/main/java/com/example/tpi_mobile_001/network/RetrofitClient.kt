@@ -23,13 +23,20 @@ object RetrofitClient {
     // "by lazy": esta variable se crea recién la PRIMERA VEZ que alguien la usa,
     // no apenas arranca la app. Es eficiente porque si nunca se llega a usar,
     // nunca se gasta el trabajo de construirla.
+    private val okHttpClient by lazy {
+        okhttp3.OkHttpClient.Builder()
+            .addInterceptor(AuthInterceptor())
+            .build()
+    }
+
     private val retrofit: Retrofit by lazy {
         Retrofit.Builder()
-            .baseUrl(BASE_URL)                    // a dónde van todos los pedidos
-            .addConverterFactory(                  // cómo convertir JSON <-> Kotlin
+            .baseUrl(BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(
                 json.asConverterFactory("application/json".toMediaType())
             )
-            .build()                                // arma el objeto Retrofit final
+            .build()
     }
 
     // Servicio para los endpoints de Partido. Retrofit "implementa" automáticamente
@@ -42,4 +49,9 @@ object RetrofitClient {
     val usuarioApi: UsuarioApiService by lazy {
         retrofit.create(UsuarioApiService::class.java)
     }
+
+    val entradaApi: EntradaApiService by lazy {
+        retrofit.create(EntradaApiService::class.java)
+    }
+
 }

@@ -16,7 +16,7 @@ import com.example.tpi_mobile_001.ui.components.getBandera
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetallePartidoScreen(partido: Partido, onVolver: () -> Unit) {
+fun DetallePartidoScreen(partido: Partido, onVolver: () -> Unit, onComprar: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -62,6 +62,13 @@ fun DetallePartidoScreen(partido: Partido, onVolver: () -> Unit) {
                 Text(text = " Hora: ${partido.hora}", style = MaterialTheme.typography.bodyLarge)
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(text = " Goles: ${partido.golesLocal} - ${partido.golesVisitante}", style = MaterialTheme.typography.bodyLarge)
+                Spacer(modifier = Modifier.height(24.dp))
+                Button(
+                    onClick = onComprar,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Comprar entrada")
+                }
             }
         }
     }

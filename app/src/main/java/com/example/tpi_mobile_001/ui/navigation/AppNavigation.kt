@@ -17,6 +17,8 @@ import com.example.tpi_mobile_001.ui.screens.LoginScreen
 import com.example.tpi_mobile_001.ui.screens.RegisterScreen
 import com.example.tpi_mobile_001.viewmodel.AuthViewModel
 import com.example.tpi_mobile_001.viewmodel.PartidoViewModel
+import com.example.tpi_mobile_001.ui.screens.CompraEntradaScreen
+
 
 @Composable
 fun AppNavigation(viewModel: PartidoViewModel, modifier: Modifier = Modifier) {
@@ -67,7 +69,7 @@ fun AppNavigation(viewModel: PartidoViewModel, modifier: Modifier = Modifier) {
                     // Reseteamos la sesión y volvemos al login,
                     // borrando tod0 el historial de navegación (popUpTo(0))
                     // para que no se pueda volver atrás a la lista sin loguearse.
-                    authViewModel.isLoggedIn = false
+                    authViewModel.cerrarSesion()
                     navController.navigate("login"){
                         popUpTo(0){ inclusive = true}
                     }
@@ -77,6 +79,15 @@ fun AppNavigation(viewModel: PartidoViewModel, modifier: Modifier = Modifier) {
         composable("detalle") {
             partidoSeleccionado?.let { partido ->
                 DetallePartidoScreen(
+                    partido = partido,
+                    onVolver = { navController.popBackStack() },
+                    onComprar = { navController.navigate("comprar") }
+                )
+            }
+        }
+        composable("comprar") {
+            partidoSeleccionado?.let { partido ->
+                CompraEntradaScreen(
                     partido = partido,
                     onVolver = { navController.popBackStack() }
                 )

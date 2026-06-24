@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.tpi_mobile_001.models.LoginRequest
 import com.example.tpi_mobile_001.models.RegistroRequest
 import com.example.tpi_mobile_001.network.RetrofitClient
+import com.example.tpi_mobile_001.network.SessionManager
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
@@ -42,6 +43,7 @@ class AuthViewModel : ViewModel() {
                     LoginRequest(username = username, password = password)
                 )
                 token = respuesta.token
+                SessionManager.token = respuesta.token
                 usuarioId = respuesta.usuarioId
                 isLoggedIn = true
                 errorMessage = null
@@ -86,5 +88,6 @@ class AuthViewModel : ViewModel() {
         isLoggedIn = false
         token = null
         usuarioId = null
+        SessionManager.token = null
     }
 }

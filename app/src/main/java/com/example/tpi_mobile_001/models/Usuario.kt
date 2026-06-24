@@ -39,3 +39,20 @@ data class Usuario(
     val username: String,
     val email: String
 )
+
+    @Serializable
+data class CompraEntradaRequest(
+    val partidoId: Int,
+    val sector: String,
+    val precio: Double
+)
+
+@Serializable
+data class EntradaDto(
+    val entradaId: Int,
+    val usuarioUsername: String,
+    val fechaCompra: String,
+    val partidoId: Int,
+    val sector: String,
+    val precio: Double
+)
