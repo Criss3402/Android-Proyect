@@ -43,18 +43,22 @@ data class Usuario(
 @Serializable
 data class CompraEntradaRequest(
     val partidoId: Int,
-    val sectorId: Int
+    val sectorId: Int   // antes tenía "sector: String" y "precio: Double"
+
 )
 
 @Serializable
 data class EntradaDto(
     val entradaId: Int,
+    val usuarioId: Int,
     val usuarioUsername: String,
-    val fechaCompra: String,
     val partidoId: Int,
-    val sector: String,
-    val precio: Double
+    val sectorId: Int,       // antes era "sector: String"
+    val sectorNombre: String, // nombre del sector
+    val precio: Double,
+    val fechaCompra: String
 )
+
 @Serializable
 data class SectorDto(
     val sectorId: Int,
