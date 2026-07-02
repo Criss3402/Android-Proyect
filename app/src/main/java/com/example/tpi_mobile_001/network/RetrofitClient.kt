@@ -54,4 +54,8 @@ object RetrofitClient {
         retrofit.create(EntradaApiService::class.java)
     }
 
+    val sectorApi: SectorApiService by lazy {
+        retrofit.create(SectorApiService::class.java)
+    }
+
 }

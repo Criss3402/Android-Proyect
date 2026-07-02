@@ -1,19 +1,20 @@
 package com.example.tpi_mobile_001.ui.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tpi_mobile_001.models.Partido
+import com.example.tpi_mobile_001.models.SectorDto
+import com.example.tpi_mobile_001.network.RetrofitClient
 import com.example.tpi_mobile_001.viewmodel.CompraUiState
 import com.example.tpi_mobile_001.viewmodel.CompraViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -22,8 +23,20 @@ fun CompraEntradaScreen(
     onVolver: () -> Unit
 ) {
     val compraViewModel: CompraViewModel = viewModel()
-    var sector by remember { mutableStateOf("") }
-    var precioTexto by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
+
+    var sectores by remember { mutableStateOf<List<SectorDto>>(emptyList()) }
+    var cargandoSectores by remember { mutableStateOf(true) }
+    var sectorSeleccionado by remember { mutableStateOf<SectorDto?>(null) }
+    var expandido by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        try {
+            sectores = RetrofitClient.sectorApi.getSectores()
+        } finally {
+            cargandoSectores = false
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -58,58 +71,74 @@ fun CompraEntradaScreen(
 
             Divider()
 
-            OutlinedTextField(
-                value = sector,
-                onValueChange = { sector = it },
-                label = { Text("Sector") },
-                placeholder = { Text("Ej: Platea, Popular, VIP") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            OutlinedTextField(
-                value = precioTexto,
-                onValueChange = { precioTexto = it },
-                label = { Text("Precio") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            val estado = compraViewModel.uiState
-
-            when (estado) {
-                is CompraUiState.Cargando -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-                }
-                is CompraUiState.Exito -> {
-                    Text(
-                        text = "Entrada comprada con éxito (ID: ${estado.entrada.entradaId})",
-                        color = MaterialTheme.colorScheme.primary
+            if (cargandoSectores) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+            } else {
+                ExposedDropdownMenuBox(
+                    expanded = expandido,
+                    onExpandedChange = { expandido = !expandido }
+                ) {
+                    OutlinedTextField(
+                        value = sectorSeleccionado?.let { "${it.nombre} — $${it.precio}" } ?: "Elegí un sector",
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Sector") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandido) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor()
                     )
-                }
-                is CompraUiState.Error -> {
-                    Text(
-                        text = estado.mensaje,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-                else -> {}
-            }
-
-            Button(
-                onClick = {
-                    val precio = precioTexto.toDoubleOrNull()
-                    if (sector.isBlank()) {
-                        compraViewModel.uiState = CompraUiState.Error("Ingresá un sector.")
-                    } else if (precio == null) {
-                        compraViewModel.uiState = CompraUiState.Error("Ingresá un precio válido.")
-                    } else {
-                        compraViewModel.comprar(partido.partidoId, sector, precio)
+                    ExposedDropdownMenu(
+                        expanded = expandido,
+                        onDismissRequest = { expandido = false }
+                    ) {
+                        sectores.forEach { sector ->
+                            DropdownMenuItem(
+                                text = { Text("${sector.nombre} — $${sector.precio}") },
+                                onClick = {
+                                    sectorSeleccionado = sector
+                                    expandido = false
+                                }
+                            )
+                        }
                     }
-                },
-                enabled = estado !is CompraUiState.Cargando && estado !is CompraUiState.Exito,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Confirmar compra")
+                }
+
+                val estado = compraViewModel.uiState
+
+                when (estado) {
+                    is CompraUiState.Cargando -> {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                    }
+                    is CompraUiState.Exito -> {
+                        Text(
+                            text = "Entrada comprada con éxito (ID: ${estado.entrada.entradaId})",
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    is CompraUiState.Error -> {
+                        Text(
+                            text = estado.mensaje,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                    else -> {}
+                }
+
+                Button(
+                    onClick = {
+                        val sector = sectorSeleccionado
+                        if (sector == null) {
+                            compraViewModel.uiState = CompraUiState.Error("Elegí un sector antes de continuar.")
+                        } else {
+                            compraViewModel.comprar(partido.partidoId, sector.sectorId)
+                        }
+                    },
+                    enabled = estado !is CompraUiState.Cargando && estado !is CompraUiState.Exito,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Confirmar compra")
+                }
             }
         }
     }

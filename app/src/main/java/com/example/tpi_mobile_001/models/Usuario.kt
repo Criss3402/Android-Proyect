@@ -40,11 +40,10 @@ data class Usuario(
     val email: String
 )
 
-    @Serializable
+@Serializable
 data class CompraEntradaRequest(
     val partidoId: Int,
-    val sector: String,
-    val precio: Double
+    val sectorId: Int
 )
 
 @Serializable
@@ -54,5 +53,11 @@ data class EntradaDto(
     val fechaCompra: String,
     val partidoId: Int,
     val sector: String,
+    val precio: Double
+)
+@Serializable
+data class SectorDto(
+    val sectorId: Int,
+    val nombre: String,
     val precio: Double
 )

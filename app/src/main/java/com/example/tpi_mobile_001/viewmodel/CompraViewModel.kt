@@ -22,17 +22,17 @@ class CompraViewModel : ViewModel() {
 
     var uiState by mutableStateOf<CompraUiState>(CompraUiState.Idle)
 
-    fun comprar(partidoId: Int, sector: String, precio: Double) {
+    fun comprar(partidoId: Int, sectorId: Int) {
         viewModelScope.launch {
             uiState = CompraUiState.Cargando
             try {
-                val entrada = repository.comprar(partidoId, sector, precio)
+                val entrada = repository.comprar(partidoId, sectorId)
                 uiState = CompraUiState.Exito(entrada)
             } catch (e: HttpException) {
                 uiState = when (e.code()) {
                     400 -> CompraUiState.Error("El partido indicado no existe.")
                     401 -> CompraUiState.Error("Tu sesión expiró. Volvé a iniciar sesión.")
-                    409 -> CompraUiState.Error("Esa entrada ya fue vendida.")
+                    409 -> CompraUiState.Error("Ya compraste una entrada para este partido y sector.")
                     else -> CompraUiState.Error("Error al comprar la entrada (código ${e.code()}).")
                 }
             } catch (e: Exception) {

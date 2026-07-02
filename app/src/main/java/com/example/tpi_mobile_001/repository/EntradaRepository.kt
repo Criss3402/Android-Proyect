@@ -7,12 +7,11 @@ import com.example.tpi_mobile_001.network.RetrofitClient
 class EntradaRepository {
     private val api = RetrofitClient.entradaApi
 
-    suspend fun comprar(partidoId: Int, sector: String, precio: Double): EntradaDto {
+    suspend fun comprar(partidoId: Int, sectorId: Int): EntradaDto {
         return api.comprar(
             CompraEntradaRequest(
                 partidoId = partidoId,
-                sector = sector,
-                precio = precio
+                sectorId = sectorId
             )
         )
     }
