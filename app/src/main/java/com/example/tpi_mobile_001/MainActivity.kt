@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import com.example.tpi_mobile_001.ui.navigation.AppNavigation
-import com.example.tpi_mobile_001.ui.theme.TPIMobile001Theme
+import com.example.tpi_mobile_001.ui.theme.TribunaTheme
 import com.example.tpi_mobile_001.viewmodel.PartidoViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 
@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            TPIMobile001Theme {
+            TribunaTheme {
                 val viewModel: PartidoViewModel = viewModel()
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     AppNavigation(

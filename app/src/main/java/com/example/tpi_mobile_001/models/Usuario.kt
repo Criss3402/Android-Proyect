@@ -53,10 +53,17 @@ data class EntradaDto(
     val usuarioId: Int,
     val usuarioUsername: String,
     val partidoId: Int,
-    val sectorId: Int,       // antes era "sector: String"
-    val sectorNombre: String, // nombre del sector
+    val sectorId: Int,
+    val sectorNombre: String,
     val precio: Double,
-    val fechaCompra: String
+    val fechaCompra: String,
+    // Datos del partido
+    val equipoLocalNombre: String,
+    val equipoVisitanteNombre: String,
+    val estadio: String,
+    val fechaPartido: String,
+    val horaPartido: String,
+    val fase: String
 )
 
 @Serializable

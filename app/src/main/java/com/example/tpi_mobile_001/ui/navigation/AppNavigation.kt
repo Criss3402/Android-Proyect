@@ -1,95 +1,228 @@
 package com.example.tpi_mobile_001.ui.navigation
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ConfirmationNumber
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.SportsSoccer
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.tpi_mobile_001.models.Partido
-import com.example.tpi_mobile_001.ui.screens.DetallePartidoScreen
-import com.example.tpi_mobile_001.ui.screens.ListaPartidosScreen
-import com.example.tpi_mobile_001.ui.screens.LoginScreen
-import com.example.tpi_mobile_001.ui.screens.RegisterScreen
+import com.example.tpi_mobile_001.ui.screens.*
+import com.example.tpi_mobile_001.ui.theme.*
 import com.example.tpi_mobile_001.viewmodel.AuthViewModel
 import com.example.tpi_mobile_001.viewmodel.PartidoViewModel
-import com.example.tpi_mobile_001.ui.screens.CompraEntradaScreen
-
 
 @Composable
 fun AppNavigation(viewModel: PartidoViewModel, modifier: Modifier = Modifier) {
     val navController = rememberNavController()
-    // ViewModel de autenticación, separado del de partidos.
-    // Cada uno maneja su propia responsabilidad (principio MVVM).
     val authViewModel: AuthViewModel = viewModel()
     var partidoSeleccionado by remember { mutableStateOf<Partido?>(null) }
 
-    NavHost(
-        navController = navController,
-        startDestination = "login", //ahora arranca en login, no en la lista
-        modifier = modifier
-    ) {
-        composable("login") {
-            LoginScreen(
-                authViewModel = authViewModel,
-                onLoginExitoso = {
-                    navController.navigate("lista") {
-                        // Borra "login" del historial de navegación.
-                        // Así si tocás "atrás" en la lista de partidos,
-                        // no volvés al login, sale de la app directamente.
-                        popUpTo("login") { inclusive = true }
-                    }
-                },
-                onIrARegistro = { navController.navigate("registro") }
-            )
-        }
-        composable("registro") {
-            RegisterScreen(
-                authViewModel = authViewModel,
-                onRegistroExitoso = {
-                    navController.navigate("lista") {
-                        popUpTo("login") { inclusive = true }
-                    }
-                },
-                onVolverALogin = { navController.popBackStack() }
-            )
-        }
-        composable("lista") {
-            ListaPartidosScreen(
-                viewModel = viewModel,
-                onPartidoClick = { partido ->
-                    partidoSeleccionado = partido
-                    navController.navigate("detalle")
-                },
-                onCerrarSesion = {
-                    // Reseteamos la sesión y volvemos al login,
-                    // borrando tod0 el historial de navegación (popUpTo(0))
-                    // para que no se pueda volver atrás a la lista sin loguearse.
-                    authViewModel.cerrarSesion()
-                    navController.navigate("login"){
-                        popUpTo(0){ inclusive = true}
-                    }
+    // Datos de la compra recién hecha, para la pantalla de éxito
+    var entradaIdExito by remember { mutableStateOf(0) }
+    var sectorNombreExito by remember { mutableStateOf("") }
+    var precioExito by remember { mutableStateOf(0) }
+
+    // Ruta actual para saber cuándo mostrar el bottom nav
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+
+    // Bottom nav solo visible en las 3 pantallas principales
+    val mostrarBottomNav = currentRoute in listOf("lista", "entradas", "perfil")
+
+    Scaffold(
+        bottomBar = {
+            if (mostrarBottomNav) {
+                NavigationBar(
+                    containerColor = FondoCard,
+
+                    ) {
+                    NavigationBarItem(
+                        selected = currentRoute == "lista",
+                        onClick = {
+                            navController.navigate("lista") {
+                                popUpTo("lista") { inclusive = false }
+                                launchSingleTop = true
+                            }
+                        },
+                        icon = {
+                            Icon(Icons.Default.SportsSoccer, contentDescription = "Partidos")
+                        },
+                        label = {
+                            Text(
+                                text = "Partidos",
+                                fontSize = 11.sp,
+                                fontFamily = Archivo,
+                                fontWeight = FontWeight.Medium
+                            )
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = TribunaAzul,
+                            selectedTextColor = TribunaAzul,
+                            unselectedIconColor = TextoSecundario,
+                            unselectedTextColor = TextoSecundario,
+                            indicatorColor = FondoSeleccion
+                        )
+                    )
+                    NavigationBarItem(
+                        selected = currentRoute == "entradas",
+                        onClick = {
+                            navController.navigate("entradas") {
+                                popUpTo("lista") { inclusive = false }
+                                launchSingleTop = true
+                            }
+                        },
+                        icon = {
+                            Icon(Icons.Default.ConfirmationNumber, contentDescription = "Entradas")
+                        },
+                        label = {
+                            Text(
+                                text = "Entradas",
+                                fontSize = 11.sp,
+                                fontFamily = Archivo,
+                                fontWeight = FontWeight.Medium
+                            )
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = TribunaAzul,
+                            selectedTextColor = TribunaAzul,
+                            unselectedIconColor = TextoSecundario,
+                            unselectedTextColor = TextoSecundario,
+                            indicatorColor = FondoSeleccion
+                        )
+                    )
+                    NavigationBarItem(
+                        selected = currentRoute == "perfil",
+                        onClick = {
+                            navController.navigate("perfil") {
+                                popUpTo("lista") { inclusive = false }
+                                launchSingleTop = true
+                            }
+                        },
+                        icon = {
+                            Icon(Icons.Default.Person, contentDescription = "Perfil")
+                        },
+                        label = {
+                            Text(
+                                text = "Perfil",
+                                fontSize = 11.sp,
+                                fontFamily = Archivo,
+                                fontWeight = FontWeight.Medium
+                            )
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = TribunaAzul,
+                            selectedTextColor = TribunaAzul,
+                            unselectedIconColor = TextoSecundario,
+                            unselectedTextColor = TextoSecundario,
+                            indicatorColor = FondoSeleccion
+                        )
+                    )
                 }
-            )
-        }
-        composable("detalle") {
-            partidoSeleccionado?.let { partido ->
-                DetallePartidoScreen(
-                    partido = partido,
-                    onVolver = { navController.popBackStack() },
-                    onComprar = { navController.navigate("comprar") }
-                )
             }
         }
-        composable("comprar") {
-            partidoSeleccionado?.let { partido ->
-                CompraEntradaScreen(
-                    partido = partido,
-                    onVolver = { navController.popBackStack() }
+    ) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = "login",
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            composable("login") {
+                LoginScreen(
+                    authViewModel = authViewModel,
+                    onLoginExitoso = {
+                        navController.navigate("lista") {
+                            popUpTo("login") { inclusive = true }
+                        }
+                    },
+                    onIrARegistro = { navController.navigate("registro") }
+                )
+            }
+            composable("registro") {
+                RegisterScreen(
+                    authViewModel = authViewModel,
+                    onRegistroExitoso = {
+                        navController.navigate("lista") {
+                            popUpTo("login") { inclusive = true }
+                        }
+                    },
+                    onVolverALogin = { navController.popBackStack() }
+                )
+            }
+            composable("lista") {
+                ListaPartidosScreen(
+                    viewModel = viewModel,
+                    onPartidoClick = { partido ->
+                        partidoSeleccionado = partido
+                        navController.navigate("detalle")
+                    },
+                    onCerrarSesion = {
+                        authViewModel.cerrarSesion()
+                        navController.navigate("login") {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                )
+            }
+            composable("detalle") {
+                partidoSeleccionado?.let { partido ->
+                    DetallePartidoScreen(
+                        partido = partido,
+                        onVolver = { navController.popBackStack() },
+                        onComprar = { navController.navigate("comprar") }
+                    )
+                }
+            }
+            composable("comprar") {
+                partidoSeleccionado?.let { partido ->
+                    CompraEntradaScreen(
+                        partido = partido,
+                        onVolver = { navController.popBackStack() },
+                        onCompraExitosa = { entradaId, sectorNombre, precio ->
+                            entradaIdExito = entradaId
+                            sectorNombreExito = sectorNombre
+                            precioExito = precio
+                            navController.navigate("exito")
+                        }
+                    )
+                }
+            }
+            composable("exito") {
+                partidoSeleccionado?.let { partido ->
+                    CompraExitoScreen(
+                        partido = partido,
+                        entradaId = entradaIdExito,
+                        sectorNombre = sectorNombreExito,
+                        precio = precioExito,
+                        onVolver = { navController.popBackStack() },
+                        onVolverALista = {
+                            navController.navigate("lista") {
+                                popUpTo("lista") { inclusive = true }
+                            }
+                        }
+                    )
+                }
+            }
+            composable("entradas") {
+                MisEntradasScreen(authViewModel = authViewModel)
+            }
+            composable("perfil") {
+                PerfilScreen(
+                    authViewModel = authViewModel,
+                    onCerrarSesion = {
+                        authViewModel.cerrarSesion()
+                        navController.navigate("login") {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
                 )
             }
         }

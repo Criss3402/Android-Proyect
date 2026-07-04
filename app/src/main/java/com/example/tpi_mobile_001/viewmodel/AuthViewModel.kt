@@ -32,6 +32,9 @@ class AuthViewModel : ViewModel() {
     var usuarioId: Int? = null
         private set
 
+    var usuarioUsername: String? = null
+        private set
+
     // Llama a POST /api/usuarios/login. Es asíncrono porque implica una
     // llamada de red real. Recibe un "onExito" que se ejecuta SOLO si el
     // login terminó bien — así la pantalla que lo llama sabe el momento
@@ -45,6 +48,7 @@ class AuthViewModel : ViewModel() {
                 token = respuesta.token
                 SessionManager.token = respuesta.token
                 usuarioId = respuesta.usuarioId
+                usuarioUsername = respuesta.username
                 isLoggedIn = true
                 errorMessage = null
                 onExito()
@@ -89,5 +93,7 @@ class AuthViewModel : ViewModel() {
         token = null
         usuarioId = null
         SessionManager.token = null
+        usuarioUsername = null
     }
 }
+
