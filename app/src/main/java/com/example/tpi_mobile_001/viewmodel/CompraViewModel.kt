@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.tpi_mobile_001.models.EntradaDto
 import com.example.tpi_mobile_001.repository.EntradaRepository
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import retrofit2.HttpException
 
 sealed class CompraUiState {
@@ -29,14 +30,36 @@ class CompraViewModel : ViewModel() {
                 val entrada = repository.comprar(partidoId, sectorId)
                 uiState = CompraUiState.Exito(entrada)
             } catch (e: HttpException) {
+                // Intentamos leer el mensaje que devuelve la API en el body del error.
+                // La API devuelve { "mensaje": "..." } en todos los errores.
+                val mensajeApi = try {
+                    val errorBody = e.response()?.errorBody()?.string()
+                    if (!errorBody.isNullOrEmpty()) {
+                        JSONObject(errorBody).getString("mensaje")
+                    } else null
+                } catch (ex: Exception) {
+                    null
+                }
+
                 uiState = when (e.code()) {
-                    400 -> CompraUiState.Error("El partido indicado no existe.")
-                    401 -> CompraUiState.Error("Tu sesión expiró. Volvé a iniciar sesión.")
-                    409 -> CompraUiState.Error("Ya compraste una entrada para este partido y sector.")
-                    else -> CompraUiState.Error("Error al comprar la entrada (código ${e.code()}).")
+                    400 -> CompraUiState.Error(
+                        mensajeApi ?: "No se pudo completar la compra."
+                    )
+                    401 -> CompraUiState.Error(
+                        "Tu sesión expiró. Volvé a iniciar sesión."
+                    )
+                    404 -> CompraUiState.Error(
+                        mensajeApi ?: "El partido indicado no existe."
+                    )
+                    409 -> CompraUiState.Error(
+                        mensajeApi ?: "Ya compraste una entrada para este partido y sector."
+                    )
+                    else -> CompraUiState.Error(
+                        mensajeApi ?: "Error al comprar la entrada (código ${e.code()})."
+                    )
                 }
             } catch (e: Exception) {
-                uiState = CompraUiState.Error("Error de conexión: ${e.message}")
+                uiState = CompraUiState.Error("Error de conexión. Verificá tu internet e intentá de nuevo.")
             }
         }
     }
