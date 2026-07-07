@@ -132,9 +132,19 @@ fun AppNavigation(viewModel: PartidoViewModel, modifier: Modifier = Modifier) {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "login",
+            startDestination = "splash",
             modifier = Modifier.padding(innerPadding)
         ) {
+
+            composable("splash") {
+                SplashScreen(
+                    onFinish = {
+                        navController.navigate("login") {
+                            popUpTo("splash") { inclusive = true }
+                        }
+                    }
+                )
+            }
             composable("login") {
                 LoginScreen(
                     authViewModel = authViewModel,
