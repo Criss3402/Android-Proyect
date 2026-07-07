@@ -52,7 +52,7 @@ class CompraViewModel : ViewModel() {
                         mensajeApi ?: "El partido indicado no existe."
                     )
                     409 -> CompraUiState.Error(
-                        mensajeApi ?: "Ya compraste una entrada para este partido y sector."
+                        mensajeApi ?: "Ocurrió un error al procesar la compra. Intentá de nuevo."
                     )
                     else -> CompraUiState.Error(
                         mensajeApi ?: "Error al comprar la entrada (código ${e.code()})."

@@ -7,12 +7,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tpi_mobile_001.models.Partido
@@ -42,6 +45,8 @@ fun ListaPartidosScreen(
     onCerrarSesion: () -> Unit
 ) {
     var grupoSeleccionado by remember { mutableStateOf<String?>(null) }
+    var busqueda by remember { mutableStateOf("") }
+
     val chips = listOf("Todos", "Grupo A", "Grupo B", "Grupo C", "Grupo D",
         "Grupo E", "Grupo F", "Grupo G", "Grupo H", "Grupo I",
         "Grupo J", "Grupo K", "Grupo L")
@@ -134,6 +139,31 @@ fun ListaPartidosScreen(
 
         HorizontalDivider(color = Borde)
 
+        // ── Campo de búsqueda ──
+        OutlinedTextField(
+            value = busqueda,
+            onValueChange = { busqueda = it },
+            placeholder = { Text("Buscar equipo...", color = TextoPlaceholder, fontFamily = Archivo) },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Buscar",
+                    tint = TextoSecundario
+                )
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            shape = RoundedCornerShape(12.dp),
+            singleLine = true,
+            colors = OutlinedTextFieldDefaults.colors(
+                unfocusedBorderColor = Borde,
+                focusedBorderColor = TribunaAzul,
+                unfocusedContainerColor = FondoCard,
+                focusedContainerColor = FondoCard
+            )
+        )
+
         // ── Lista ──
         when (val state = viewModel.uiState) {
             is PartidoUiState.Loading -> {
@@ -147,17 +177,38 @@ fun ListaPartidosScreen(
                 }
             }
             is PartidoUiState.Success -> {
-                val partidosFiltrados = if (grupoSeleccionado == null) state.partidos
-                else state.partidos.filter { it.fase == grupoSeleccionado }
+                // Filtro por grupo Y por búsqueda de texto
+                val partidosFiltrados = state.partidos
+                    .filter { partido ->
+                        grupoSeleccionado == null || partido.fase == grupoSeleccionado
+                    }
+                    .filter { partido ->
+                        busqueda.isEmpty() ||
+                                partido.equipoLocalNombre.contains(busqueda, ignoreCase = true) ||
+                                partido.equipoVisitanteNombre.contains(busqueda, ignoreCase = true)
+                    }
 
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize().background(FondoApp),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(0.dp)
-                ) {
-                    items(partidosFiltrados) { partido ->
-                        PartidoCard(partido = partido, onClick = { onPartidoClick(partido) })
-                        Spacer(modifier = Modifier.height(12.dp))
+                if (partidosFiltrados.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "No hay partidos para esta búsqueda",
+                            color = TextoSecundario,
+                            fontFamily = Archivo,
+                            fontSize = 14.sp
+                        )
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(FondoApp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(0.dp)
+                    ) {
+                        items(partidosFiltrados) { partido ->
+                            PartidoCard(partido = partido, onClick = { onPartidoClick(partido) })
+                            Spacer(modifier = Modifier.height(12.dp))
+                        }
                     }
                 }
             }
@@ -175,14 +226,12 @@ fun PartidoCard(partido: Partido, onClick: () -> Unit) {
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)) {
-
             // Badge grupo + fecha
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Badge en una sola línea
                 Surface(
                     shape = RoundedCornerShape(6.dp),
                     color = FondoSeleccion
@@ -196,8 +245,6 @@ fun PartidoCard(partido: Partido, onClick: () -> Unit) {
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }
-
-                // Fecha "11 JUN · 16:00"
                 Text(
                     text = "${formatearFechaCompleta(partido.fecha)} · ${partido.hora.take(5)}",
                     fontSize = 12.sp,
@@ -214,58 +261,51 @@ fun PartidoCard(partido: Partido, onClick: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Local
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.widthIn(max = 140.dp)
                 ) {
-                    Text(text = getBandera(partido.equipoLocalNombre), fontSize = 28.sp)
+                    Text(text = getBandera(partido.equipoLocalNombre), fontSize = 26.sp)
                     Text(
                         text = partido.equipoLocalNombre,
-                        fontSize = 16.sp,
+                        fontSize = 15.sp,
                         fontFamily = Archivo,
                         fontWeight = FontWeight.Bold,
                         color = TextoPrimario,
                         maxLines = 1,
-                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
-
-                // VS centro fijo
                 Text(
                     text = "vs",
-                    fontSize = 13.sp,
+                    fontSize = 12.sp,
                     fontFamily = Archivo,
-                    fontWeight = FontWeight.Bold,
-                    color = TextoSecundario,
-                    modifier = Modifier.padding(horizontal = 8.dp)
+                    color = TextoSecundario
                 )
-
-                // Visitante — alineado a la derecha dentro de su mitad
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.End,
-                    modifier = Modifier.weight(1f)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.widthIn(max = 140.dp)
                 ) {
                     Text(
                         text = partido.equipoVisitanteNombre,
-                        fontSize = 16.sp,
+                        fontSize = 15.sp,
                         fontFamily = Archivo,
                         fontWeight = FontWeight.Bold,
                         color = TextoPrimario,
                         maxLines = 1,
-                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(end = 8.dp)
+                        overflow = TextOverflow.Ellipsis
                     )
-                    Text(text = getBandera(partido.equipoVisitanteNombre), fontSize = 28.sp)
+                    Text(text = getBandera(partido.equipoVisitanteNombre), fontSize = 26.sp)
                 }
             }
+
             Spacer(modifier = Modifier.height(10.dp))
             HorizontalDivider(color = Borde, thickness = 0.5.dp)
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Estadio con pin rojo
+            // Estadio
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
